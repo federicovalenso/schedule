@@ -1,0 +1,174 @@
+body {
+    width: 100%;
+    font-size: 1.2em;
+}
+
+.nav {
+    width: 30%;
+    margin: 0.5em auto;
+    padding: 0 0.5em;    
+    background-color: #ffffff;
+    border-bottom: 1px solid #e1e6e7;
+  }
+  
+.nav__list {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    list-style: none;
+}
+
+.nav__item a {
+    position: relative;
+    display: block;
+    padding: 0.5em 0.5em;
+    font-weight: 700;
+    color: #45abde;
+}
+
+.nav__item a::before {
+    content: "";
+    display: none;
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 20px);
+    height: 3px;
+    background-color: #e2e5e6;
+}
+
+.nav__item a:hover::before {
+    display: block;
+}
+
+.nav__item a:active {
+    color: #2590c6;
+}
+
+.nav__item--current a {
+    color: rgba(37, 67, 78, 0.6);
+}
+
+.nav__item--current a::before {
+    display: block;
+    background-color: #45abde;
+}
+
+.table {
+    display: table;
+    width: 90%;
+    margin: auto;
+    text-align: center;
+}
+
+.table-caption {
+    display: table-caption;
+    margin-bottom: 0.25em;
+    vertical-align: bottom;
+}
+
+.table-caption a {
+    text-decoration: none;
+}
+
+.table-caption .prev_button {
+    color: crimson;
+}
+
+.table-caption .fwd_button {
+    color: green;
+}
+
+.table-row {
+    display: table-row;
+    font-weight: bold;
+}
+
+.table-cell, 
+.table-col input, 
+.doc-data li, 
+.doc-data input, 
+.table-row label,
+.table-row input
+{
+    display: table-cell;
+    padding-top: 0.25em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    border: 0.05em solid black;
+    vertical-align: middle;
+}
+
+.time-cell {
+    padding: 0;
+}
+
+.table-row:hover .table-cell {
+    background: cornflowerblue;
+    cursor: pointer;
+}
+
+.table-row .cab {
+    background: greenyellow;
+}
+
+.table-row .start_wt {
+    background: teal;
+}
+
+.table-row .end_wt {
+    background: aquamarine;
+}
+
+.form--edit-sched {
+    background: white;
+}
+
+.doc-data {
+    display: table;
+    margin: 0.5em auto;
+    margin-bottom: 0.5em;
+}
+
+.doc-data .doc-data-header, .table-header {
+    display: table-header-group;
+    background: #1fdd38;
+    text-align: center;
+}
+
+.doc-data .doc-data-row {
+    display: table-row;
+}
+
+.doc-data-row:hover {
+    cursor: pointer;
+    color: #5e94d3;
+}
+
+.form-item {
+    width: 40%;
+    margin: auto;
+    margin-bottom: 1em;
+}
+
+.form-item label {
+    display: block;
+    margin-bottom: 0.1em;
+}
+
+@media (max-width: 1024px) {
+    body {
+        font-size: 1em;
+    }
+
+    .nav {
+        width: 70%;
+        margin: 0.25em auto;
+        padding: 0 0.25em;
+      }
+}
