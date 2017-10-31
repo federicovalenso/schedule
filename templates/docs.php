@@ -1,3 +1,4 @@
+<a class="button" href="doc-editor.php">Добавить</a>
 <div class="doc-data">
     <ul class="doc-data-header">
         <li>Кабинет</li>

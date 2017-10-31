@@ -21,17 +21,18 @@ if ($cur_screen < 8) {
     $fwd_screen = $cur_screen + 1;
 }
 $db = new DB();
-$docs = $db->select_data(
+$scheds = $db->select_data(
     "SELECT cab,
     concat_ws(' ', surname, name, patronymic) as snp,
     (SELECT name FROM posts WHERE posts.id = post_id) as post,
     sched.*
-    FROM docs 
-    INNER JOIN sched ON docs.doc_id = sched.doc_id 
-    WHERE screen_id=$cur_screen", 
-    []);
+    FROM sched 
+    INNER JOIN docs ON sched.doc_id = docs.doc_id 
+    WHERE screen_id=?
+    ORDER BY fl_display DESC, screen_position ASC", 
+    [$cur_screen]);
 $template_main = build_template('main',
-    ['docs' => $docs,
+    ['scheds' => $scheds,
     'cur_screen' => $cur_screen,
     'prev_screen' => $prev_screen,
     'fwd_screen' => $fwd_screen]);

@@ -11,7 +11,8 @@ $docs = $db->select_data(
     cab,
     concat_ws(' ', surname, name, patronymic) as snp,
     (SELECT name FROM posts WHERE posts.id = post_id) as post
-    FROM docs", 
+    FROM docs
+    ORDER BY snp", 
     []);
 $template_docs = build_template('docs',
     ['docs' => $docs]);

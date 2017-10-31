@@ -3,6 +3,14 @@ body {
     font-size: 1.2em;
 }
 
+.hide {
+    display: none;
+}
+
+input[type="submit"] {
+    cursor: pointer;
+}
+
 .nav {
     width: 30%;
     margin: 0.5em auto;
@@ -129,6 +137,10 @@ body {
     background: white;
 }
 
+.post-data {
+    width: auto;
+}
+
 .doc-data {
     display: table;
     margin: 0.5em auto;
@@ -159,6 +171,29 @@ body {
 .form-item label {
     display: block;
     margin-bottom: 0.1em;
+}
+
+.form-item .error-label {
+    color: red;
+}
+
+.form-item input[type="number"] {
+    width: 10%;
+}
+
+.error-item {
+    color: red;
+    border: 1px solid red;
+}
+
+.button {
+    display: table;
+    margin: auto;
+    margin-bottom: 0.25em;
+    padding: 0.25em;
+    background: grey;
+    color: black;
+    text-decoration: none;
 }
 
 @media (max-width: 1024px) {
