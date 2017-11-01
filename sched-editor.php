@@ -22,7 +22,6 @@ $docs = $db->select_data(
 $screens = $db->select_data("SELECT * FROM screens");
 $fl_display = 0;
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    var_dump($_POST);
     $rules = [
         'sched_id' => v::optional(v::intVal()),
         'doc_id' => v::optional(v::intVal()),
@@ -65,6 +64,27 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     $cur_sched['fl_display'] = (isset($_POST['fl_display']) == TRUE) ? 1 : 0;
+    if (isset($errors['screen_id']) == FALSE && $cur_sched['fl_display'] == 1) {
+        $scheds_on_screen = $db->select_data(
+            "SELECT sched_id
+            FROM sched 
+            WHERE screen_id=?",
+            [$cur_sched['screen_id']]);
+        if (count($scheds_on_screen) >= 9) {
+            $errors['fl_display'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
+        }
+    }
+    if ($cur_sched['sched_id'] == NULL) {
+        if (chk_dupl_doc_sched($cur_sched['doc_id']) == TRUE) {
+            $errors['doc_id'] = "Для данного доктора уже существует расписание, просто отредактируйте его при необходимости!";
+        }
+    }
+    if ($cur_sched['fl_display'] == 1) {
+        $exist_sched_id = chk_dupl_screen_position($cur_sched['screen_id'], $cur_sched['screen_position']);
+        if ($exist_sched_id != NULL && $cur_sched['sched_id'] != $exist_sched_id) {
+            $errors['screen_position'] = "Данная позиция уже присутствует на экране!";
+        }
+    }
     if (count($errors) == 0) {
         if ($cur_sched['sched_id'] != NULL) {
             $db->exec_query(
@@ -139,6 +159,14 @@ if($_SERVER['REQUEST_METHOD'] == 'GET') {
             [$sched_id]);
         $cur_sched = $scheds[0];
         $fl_display = $cur_sched['fl_display'];
+    }
+    else if (isset($_GET['screen_id']) == TRUE) {
+        $screen_id = intval($_GET['screen_id']);
+        if (check_screen_id($screen_id) == FALSE) {
+            print('Incorrect screen id...');
+            exit();
+        }
+        $cur_sched['screen_id'] = $screen_id;
     }
 }
 $template_editor = build_template('sched-editor',

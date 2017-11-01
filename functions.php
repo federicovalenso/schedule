@@ -1,4 +1,5 @@
 <?php
+require_once('db.php');
 /**
  * Создает шаблон html-документа, принимая на вход имя файла-шаблона и 
  * массив параметров, значения которых подставляются в файле-шаблоне
@@ -18,4 +19,62 @@ function build_template($file, $params) {
         $template = ob_get_clean();
     }
     return $template;
+}
+/**
+ * Проверяет корректность id экрана
+ * id должно соотвествовать перечислению [1...9]
+ * @param $id int идентификатор экрана
+ *
+ * @return $result boolean если идентификтор - положительное число, меньшее 10, то он корректен, иначе нет
+ */
+function check_screen_id($id) {
+    $result = FALSE;
+    if (is_int($id) && $id > 0 && $id < 10) {
+        $result = TRUE;
+    }
+    return $result;
+}
+/**
+ * Проверяет существует ли у врача с указанным id расписание
+ * @param $id int идентификатор врача
+ *
+ * @return $result boolean если расписание существует, то TRUE
+ */
+function chk_dupl_doc_sched($id) {
+    $result = FALSE;
+    $db = new DB();
+    $sched = $db->select_data(
+        "SELECT sched_id
+        FROM sched
+        WHERE doc_id=?",
+        [$id]);
+    if (count($sched) > 0) {
+        $result = TRUE;
+    }
+    return $result;
+}
+/**
+ * Проверяет существует ли на экране расписание с заданной отображаемой позицией
+ * @param $screen_id int идентификатор экрана
+ * @param $screen_position int идентификатор позиции на экране
+ *
+ * @return $out_sched_id int если на экране если строка расписания с искомой позицией,
+ * то вернётся id расписания, иначе NULL
+ */
+function chk_dupl_screen_position($screen_id, $screen_position) {
+    $out_sched_id = NULL;
+    $db = new DB();
+    $sched = $db->select_data(
+        "SELECT sched_id
+        FROM sched
+        WHERE screen_id=? AND
+        screen_position=? AND
+        fl_display=1",
+        [$screen_id,
+        $screen_position]
+    );
+    if (count($sched) > 0) {
+        $out_sched_id = $sched[0]['sched_id'];
+    }
+    return $out_sched_id;
 }
