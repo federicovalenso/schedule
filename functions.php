@@ -5,7 +5,7 @@ require_once('db.php');
  * массив параметров, значения которых подставляются в файле-шаблоне
  * @param $file string имя файла-шаблона
  * @param $sql array ассоциативный массив, ключи которого - имена переменных
- *              в файле-шаблоне, значения - значения переменных в файле-шаблоне
+ *          в файле-шаблоне, значения - значения переменных в файле-шаблоне
  *
  * @return string строка, содержащая шаблон html-документа
  */
@@ -38,20 +38,22 @@ function check_screen_id($id) {
  * Проверяет существует ли у врача с указанным id расписание
  * @param $id int идентификатор врача
  *
- * @return $result boolean если расписание существует, то TRUE
+ * @return $out_sched_id int идентификатор строки расписание, если оно существует,
+ *          иначе NULL
  */
 function chk_dupl_doc_sched($id) {
-    $result = FALSE;
+    $out_sched_id = NULL;
     $db = new DB();
     $sched = $db->select_data(
         "SELECT sched_id
         FROM sched
-        WHERE doc_id=?",
+        WHERE doc_id=? AND
+        fl_display=1",
         [$id]);
     if (count($sched) > 0) {
-        $result = TRUE;
+        $out_sched_id = $sched[0]['sched_id'];
     }
-    return $result;
+    return $out_sched_id;
 }
 /**
  * Проверяет существует ли на экране расписание с заданной отображаемой позицией
@@ -59,7 +61,7 @@ function chk_dupl_doc_sched($id) {
  * @param $screen_position int идентификатор позиции на экране
  *
  * @return $out_sched_id int если на экране если строка расписания с искомой позицией,
- * то вернётся id расписания, иначе NULL
+ *          то вернётся id расписания, иначе NULL
  */
 function chk_dupl_screen_position($screen_id, $screen_position) {
     $out_sched_id = NULL;
