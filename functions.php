@@ -35,6 +35,26 @@ function check_screen_id($id) {
     return $result;
 }
 /**
+ * Проверяет факт существования расписания с переданным id
+ * @param $id int идентификатор расписания
+ *
+ * @return $result boolean если расписание с текущим идентификатором существует
+ */
+function sched_id_exists($id) {
+    $result = FALSE;
+    $db = new DB();
+    $sched = $db->select_data(
+        "SELECT sched_id
+        FROM sched
+        WHERE sched_id=?",
+        [$id]
+    );
+    if (count($sched) > 0) {
+        $result = TRUE;
+    }
+    return $result;
+}
+/**
  * Проверяет существует ли у врача с указанным id расписание
  * @param $id int идентификатор врача
  *
@@ -43,17 +63,20 @@ function check_screen_id($id) {
  */
 function chk_dupl_doc_sched($id) {
     $out_sched_id = NULL;
+    $out_screen_id = NULL;
     $db = new DB();
     $sched = $db->select_data(
-        "SELECT sched_id
+        "SELECT sched_id,
+        screen_id
         FROM sched
         WHERE doc_id=? AND
         fl_display=1",
         [$id]);
     if (count($sched) > 0) {
         $out_sched_id = $sched[0]['sched_id'];
+        $out_screen_id = $sched[0]['screen_id'];
     }
-    return $out_sched_id;
+    return [$out_sched_id, $out_screen_id];
 }
 /**
  * Проверяет существует ли на экране расписание с заданной отображаемой позицией
@@ -79,4 +102,42 @@ function chk_dupl_screen_position($screen_id, $screen_position) {
         $out_sched_id = $sched[0]['sched_id'];
     }
     return $out_sched_id;
+}
+/**
+ * Изменяет положение строки расписания на экране в соответствии с направлением
+ * @param $id int идентификатор строки расписания
+ * @param $direction int направление и длина перемещения
+ * @return Nothing
+ * 
+ * @throws Exception Incorrect screen position
+ */
+function change_screen_position($id, $direction) {
+    $db = new DB();
+    $cur_sched = $db->select_data(
+        "SELECT screen_position,
+        screen_id
+        FROM sched
+        WHERE sched_id=?",
+        [$id])[0];
+    $old_position = intval($cur_sched['screen_position']);
+    $new_position = $old_position + $direction;
+    if ($new_position < 1 || $new_position > 9) {
+        throw new Exception('Incorrect screen position');
+    }
+    $db->exec_query(
+        "UPDATE sched
+        SET screen_position=?
+        WHERE 
+        screen_id=? AND
+        screen_position=?",
+        [$old_position,
+        $cur_sched['screen_id'],
+        $new_position]);
+    $db->exec_query(
+        "UPDATE sched
+        SET screen_position=?
+        WHERE
+        sched_id=?",
+        [$new_position,
+        $id]);
 }

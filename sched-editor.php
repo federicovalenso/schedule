@@ -36,7 +36,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         'fri' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
         'fri_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
         'screen_id' => v::intVal()->min(1)->max(count($screens)),
-        'screen_position' => v::intVal()->min(1)->max(9)
     ];
     $errors_desc = [
         'sched_id' => 'Некорректный id расписания',
@@ -52,7 +51,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         'fri' => 'Некорректно введено время!',
         'fri_end' => 'Некорректно введено время!',
         'screen_id' => 'Неверный номер экрана!',
-        'screen_position' => 'Выбрана некорректная позиция на экране!'
     ];
     foreach ($_POST as $key => $value) {
         $cur_sched[$key] = trim(htmlspecialchars($value));
@@ -63,40 +61,29 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors[$key] = $errors_desc[$key];
         }
     }
-    $cur_sched['fl_display'] = (isset($_POST['fl_display']) == TRUE) ? 1 : 0;
+    $fl_display = $cur_sched['fl_display'] = (isset($_POST['fl_display']) == TRUE) ? 1 : 0;
     if (isset($errors['screen_id']) == FALSE && $cur_sched['fl_display'] == 1) {
-        if ($cur_sched['sched_id'] == NULL) {
-            $scheds_on_screen = $db->select_data(
-                "SELECT sched_id
-                FROM sched 
-                WHERE 
-                screen_id=? AND
-                fl_display=1",
-                [$cur_sched['screen_id']]);
+        $scheds_on_screen = $db->select_data(
+            "SELECT sched_id
+            FROM sched 
+            WHERE 
+            screen_id=? AND
+            sched_id<>? AND
+            fl_display=1",
+            [$cur_sched['screen_id'],
+            $cur_sched['sched_id']]);            
+        $sched_rows = count($scheds_on_screen);
+        if ($sched_rows >= 9) {
+            $errors['fl_display'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
         }
         else {
-            $scheds_on_screen = $db->select_data(
-                "SELECT sched_id
-                FROM sched 
-                WHERE 
-                screen_id=? AND
-                sched_id<>? AND
-                fl_display=1",
-                [$cur_sched['screen_id'],
-                $cur_sched['sched_id']]);            
-        }
-        if (count($scheds_on_screen) >= 9) {
-            $errors['fl_display'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
+            $cur_sched['screen_position'] = $sched_rows + 1;
         }
     }
     if ($cur_sched['fl_display'] == 1) {
-        $exist_sched_id = chk_dupl_doc_sched($cur_sched['doc_id']);
+        list($exist_sched_id, $exist_screen_id) = chk_dupl_doc_sched($cur_sched['doc_id']);
         if ($exist_sched_id != NULL && $cur_sched['sched_id'] != $exist_sched_id) {
-            $errors['doc_id'] = "Для данного доктора уже существует расписание, просто отредактируйте его при необходимости!";
-        }
-        $exist_sched_id = chk_dupl_screen_position($cur_sched['screen_id'], $cur_sched['screen_position']);
-        if ($exist_sched_id != NULL && $cur_sched['sched_id'] != $exist_sched_id) {
-            $errors['screen_position'] = "Данная позиция уже присутствует на экране!";
+            $errors['doc_id'] = "Для данного доктора уже существует расписание на экране $exist_screen_id, просто отредактируйте его при необходимости!";
         }
     }
     if (count($errors) == 0) {
@@ -191,5 +178,6 @@ $template_editor = build_template('sched-editor',
     'fl_display' => $fl_display]);
 print(build_template('layout',
     ['title' => 'Редактор расписания',
+    'screen' => $cur_sched['screen_id'],
     'content' => $template_editor
     ]));

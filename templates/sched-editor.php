@@ -67,12 +67,7 @@
                 <?php endforeach ?>
             </select>
             <label class="error-label"><?= $errors['screen_id'] ?? '' ?></label>
-        </div>
-        <div class="form-item">
-            <label>Позиция на экране</label>
-            <input type="number" name="screen_position" value="<?= $sched['screen_position'] ?? '' ?>" required>
-            <label class="error-label"><?= $errors['screen_position'] ?? '' ?></label>
-        </div>     
+        </div>  
         <div class="form-item">
             <label><input type="checkbox" name="fl_display" <?= $fl_display == 1 ? 'checked' : '' ?>>Отображать на экране</label>
             <label class="error-label"><?= $errors['fl_display'] ?? '' ?></label>

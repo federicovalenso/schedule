@@ -17,7 +17,7 @@
                         <a href="posts.php">Должности</a>
                     </li>                    
                     <li class="nav__item">
-                        <a href="index.php">Расписание</a>
+                        <a href="index.php<?= isset($screen) == TRUE ? '?screen='.$screen : '' ?>">Расписание</a>
                     </li>
                 </ul>
             </nav>

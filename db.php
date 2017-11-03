@@ -1,27 +1,22 @@
 <?php 
-
 class DB {
     
     var $conn;
 
     function __construct(){
-        $this->conn = $this->getMySqlConnector();
+        $this->conn = $this->get_mysql_connector();
     }
-
     function __destruct(){
         if(isset($this->conn)){
             $this->conn->close();
         }
     }
-    
-    function SanitizeString($var){
+    function sanitize_string($var){
         $var = strip_tags($var);
         $var = htmlentities($var, ENT_QUOTES ,"UTF-8");
         return stripslashes($var);
     }    
-
-    function getMySqlConnector(){
-        
+    function get_mysql_connector(){
         $server = 'localhost';
         $user = 'valera';
         $pass = 'valerap';
@@ -34,7 +29,6 @@ class DB {
             exit();
         }
         return $conn;
-
     }
     /**
      * Производит запрос на поиск данных к MySql и возвращает двумерный массив данных
@@ -144,7 +138,5 @@ class DB {
         }
         return $stmt;
     }
-
 }
-
 ?>

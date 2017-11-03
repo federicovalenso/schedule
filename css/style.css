@@ -3,6 +3,10 @@ body {
     font-size: 1.2em;
 }
 
+a {
+    text-decoration: none;
+}
+
 .hide {
     display: none;
 }
@@ -80,10 +84,6 @@ input[type="submit"] {
     vertical-align: bottom;
 }
 
-.table-caption a {
-    text-decoration: none;
-}
-
 .table-caption .prev_button {
     color: crimson;
 }
@@ -112,12 +112,25 @@ input[type="submit"] {
     vertical-align: middle;
 }
 
+.table-cell .up {
+    color: blue;
+}
+
+.table-cell .down {
+    color: red;
+}
+
+.table-cell .up:hover,
+.table-cell .down:hover {
+    color: #0edf5e;
+}
+
 .time-cell {
     padding: 0;
 }
 
 .table-row:hover .table-cell {
-    background: cornflowerblue;
+    background: rgb(192, 211, 243);
     cursor: pointer;
 }
 
