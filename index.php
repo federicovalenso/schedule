@@ -67,8 +67,7 @@ $scheds = $db->select_data(
     FROM sched 
     INNER JOIN docs ON sched.doc_id = docs.doc_id 
     WHERE 
-    screen_id=? AND
-    fl_display=1
+    screen_id=?
     ORDER BY screen_position ASC", 
     [$cur_screen]);
 $template_main = build_template('main',

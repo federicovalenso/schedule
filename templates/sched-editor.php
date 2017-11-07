@@ -69,10 +69,6 @@
             <label class="error-label"><?= $errors['screen_id'] ?? '' ?></label>
         </div>  
         <div class="form-item">
-            <label><input type="checkbox" name="fl_display" <?= $fl_display == 1 ? 'checked' : '' ?>>Отображать на экране</label>
-            <label class="error-label"><?= $errors['fl_display'] ?? '' ?></label>
-        </div>        
-        <div class="form-item">
             <input type="submit" value="Сохранить">
         </div>      
 </form>

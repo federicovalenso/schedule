@@ -20,8 +20,8 @@ $docs = $db->select_data(
     ORDER BY snp",
     []);
 $screens = $db->select_data("SELECT * FROM screens");
-$fl_display = 0;
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $rules = [
         'sched_id' => v::optional(v::intVal()),
         'doc_id' => v::optional(v::intVal()),
@@ -52,41 +52,41 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         'fri_end' => 'Некорректно введено время!',
         'screen_id' => 'Неверный номер экрана!',
     ];
+
     foreach ($_POST as $key => $value) {
         $cur_sched[$key] = trim(htmlspecialchars($value));
-        if ($key == 'fl_display') {
-            continue;
-        }
         if ($rules[$key]->validate($value) == FALSE) {
             $errors[$key] = $errors_desc[$key];
         }
     }
-    $fl_display = $cur_sched['fl_display'] = (isset($_POST['fl_display']) == TRUE) ? 1 : 0;
-    if (isset($errors['screen_id']) == FALSE && $cur_sched['fl_display'] == 1) {
+
+    list($exist_sched_id, $exist_screen_id) = chk_dupl_doc_sched($cur_sched['doc_id']);
+    
+    if ($exist_sched_id != NULL && $cur_sched['sched_id'] != $exist_sched_id) {
+        $errors['doc_id'] = "Для данного доктора уже существует расписание на экране $exist_screen_id, просто отредактируйте его при необходимости!";
+    }
+
+    if (isset($errors['screen_id']) == FALSE) {
         $scheds_on_screen = $db->select_data(
             "SELECT sched_id
             FROM sched 
             WHERE 
             screen_id=? AND
-            sched_id<>? AND
-            fl_display=1",
+            sched_id<>?",
             [$cur_sched['screen_id'],
             $cur_sched['sched_id']]);            
         $sched_rows = count($scheds_on_screen);
+    
         if ($sched_rows >= 9) {
-            $errors['fl_display'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
+            $errors['screen_id'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
         }
         else {
             $cur_sched['screen_position'] = $sched_rows + 1;
         }
     }
-    if ($cur_sched['fl_display'] == 1) {
-        list($exist_sched_id, $exist_screen_id) = chk_dupl_doc_sched($cur_sched['doc_id']);
-        if ($exist_sched_id != NULL && $cur_sched['sched_id'] != $exist_sched_id) {
-            $errors['doc_id'] = "Для данного доктора уже существует расписание на экране $exist_screen_id, просто отредактируйте его при необходимости!";
-        }
-    }
+    
     if (count($errors) == 0) {
+    
         if ($cur_sched['sched_id'] != NULL) {
             $db->exec_query(
                 "UPDATE sched
@@ -102,7 +102,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 fri=?,
                 fri_end=?,
                 screen_id=?,
-                fl_display=?,
                 screen_position=?
                 WHERE sched_id=?",
                 [$cur_sched['doc_id'],
@@ -117,11 +116,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $cur_sched['fri'],
                 $cur_sched['fri_end'],
                 $cur_sched['screen_id'],
-                $cur_sched['fl_display'],
                 $cur_sched['screen_position'],
                 $cur_sched['sched_id']
                 ]
             );
+            if ($cur_sched['screen_id'] != $exist_screen_id) {
+                refresh_screen_positions($exist_screen_id);
+            }
         }
         else {
             $db->insert_data(
@@ -138,44 +139,49 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'fri' => $cur_sched['fri'],
                 'fri_end' => $cur_sched['fri_end'],
                 'screen_id' => $cur_sched['screen_id'],
-                'fl_display' => $cur_sched['fl_display'],
                 'screen_position' => $cur_sched['screen_position']
                 ]
             );
         }
+
         header('Location: index.php?screen='.$cur_sched['screen_id']);
     }
 }
-if($_SERVER['REQUEST_METHOD'] == 'GET') {
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
     if (isset($_GET['id']) == TRUE) {
         $sched_id = intval($_GET['id']);
+
         if (is_int($sched_id) == FALSE) {
             print('Incorrect id type...');
             exit();
         }
+
         $scheds = $db->select_data(
             "SELECT *
             FROM sched
             WHERE sched_id=?",
             [$sched_id]);
         $cur_sched = $scheds[0];
-        $fl_display = $cur_sched['fl_display'];
     }
     else if (isset($_GET['screen_id']) == TRUE) {
         $screen_id = intval($_GET['screen_id']);
+
         if (check_screen_id($screen_id) == FALSE) {
             print('Incorrect screen id...');
             exit();
         }
+
         $cur_sched['screen_id'] = $screen_id;
     }
 }
+
 $template_editor = build_template('sched-editor',
     ['errors' => $errors,
     'sched' => $cur_sched,
     'docs' => $docs,
-    'screens' => $screens,
-    'fl_display' => $fl_display]);
+    'screens' => $screens]);
 print(build_template('layout',
     ['title' => 'Редактор расписания',
     'screen' => $cur_sched['screen_id'],

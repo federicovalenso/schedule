@@ -120,6 +120,12 @@ input[type="submit"] {
     color: red;
 }
 
+.arrows {
+    margin: 0;
+    padding: 0;
+    font-size: 1.5em;
+}
+
 .table-cell .up:hover,
 .table-cell .down:hover {
     color: #0edf5e;
@@ -199,14 +205,19 @@ input[type="submit"] {
     border: 1px solid red;
 }
 
-.button {
+input[type="submit"], .button {
     display: table;
     margin: auto;
     margin-bottom: 0.25em;
-    padding: 0.25em;
-    background: grey;
+    padding: 0.5em;
+    background: rgb(71, 145, 241);
     color: black;
     text-decoration: none;
+    border-radius: 0.5em;
+}
+
+input[type="submit"]:hover, .button:hover {
+    color: yellowgreen;
 }
 
 @media (max-width: 1024px) {

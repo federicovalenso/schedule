@@ -18,7 +18,7 @@
     </div>
     <?php foreach($scheds as $cur_sched) : ?>
         <div class="table-row schedule-row" data-label=<?= $cur_sched['sched_id'] ?>>
-            <div class="table-cell">
+            <div class="table-cell arrows">
                 <?php if($cur_sched['screen_position']!=1) : ?>
                     <a href="?screen=<?= $cur_screen ?>&sched_id=<?= $cur_sched['sched_id'] ?>&action=move_up">
                         <div class="up">&#9650;</div>
