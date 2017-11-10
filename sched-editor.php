@@ -120,8 +120,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $cur_sched['sched_id']
                 ]
             );
-            if ($cur_sched['screen_id'] != $exist_screen_id) {
-                refresh_screen_positions($exist_screen_id);
+            if ($exist_screen_id != NULL && $cur_sched['screen_id'] != $exist_screen_id) {
+                try {
+                    refresh_screen_positions($exist_screen_id);
+                }
+                catch (Exception $e) {
+                    print ($e->getMessage());
+                    exit();
+                }
             }
         }
         else {
