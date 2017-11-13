@@ -123,7 +123,7 @@ function chk_dupl_screen_position($screen_id, $screen_position) {
  * @param $direction int направление и длина перемещения
  * @return Nothing
  * 
- * @throws Exception Incorrect screen position
+ * @throws Неверная позиция на экране
  */
 function change_screen_position($id, $direction) {
     $db = new DB();
@@ -138,7 +138,7 @@ function change_screen_position($id, $direction) {
     $new_position = $old_position + $direction;
 
     if ($new_position < 1 || $new_position > 9) {
-        throw new Exception('Incorrect screen position');
+        throw new Exception('Неверная позиция на экране');
     }
 
     $db->exec_query(
@@ -164,19 +164,21 @@ function change_screen_position($id, $direction) {
  *
  * @return nothing
  * 
- *  * @throws Exception Incorrect screen id
+ *  * @throws Неверный идентификатор экрана
  */
 function refresh_screen_positions($screen_id) {
     $db = new DB();
 
     if ($screen_id < 1 || $screen_id > 8) {
-        throw new Exception('Incorrect screen id');
+        throw new Exception('Неверный идентификатор экрана');
     }
 
     $scheds = $db->select_data(
-        "SELECT sched_id
+        "SELECT sched_id,
+        screen_position
         FROM sched
-        WHERE screen_id=?",
+        WHERE screen_id=?
+        ORDER BY screen_position ASC",
         [$screen_id]
     );
     $scheds_size = count($scheds);

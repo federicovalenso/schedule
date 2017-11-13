@@ -72,3 +72,13 @@
             <input type="submit" value="Сохранить">
         </div>      
 </form>
+
+<?php if(isset($sched['sched_id']) == TRUE) : ?>
+<form action="delete.php" method="POST">
+    <input class="hide" type="number" name="sched_id" value=<?= $sched['sched_id'] ?> required>
+    <input class="hide" type="number" name="screen_id" value=<?= $sched['screen_id'] ?> required>
+    <div class="form-item">
+        <input class="button-delete" type="submit" value="Удалить">
+    </div>
+</form>
+<?php endif ?>

@@ -169,7 +169,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             FROM sched
             WHERE sched_id=?",
             [$sched_id]);
-        $cur_sched = $scheds[0];
+
+        if (count($scheds) > 0) {
+            $cur_sched = $scheds[0];
+        }
     }
     else if (isset($_GET['screen_id']) == TRUE) {
         $screen_id = intval($_GET['screen_id']);
@@ -190,6 +193,6 @@ $template_editor = build_template('sched-editor',
     'screens' => $screens]);
 print(build_template('layout',
     ['title' => 'Редактор расписания',
-    'screen' => $cur_sched['screen_id'],
+    'screen' => $cur_sched['screen_id'] ?? '',
     'content' => $template_editor
     ]));

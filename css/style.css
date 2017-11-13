@@ -7,6 +7,10 @@ a {
     text-decoration: none;
 }
 
+p {
+    text-align: center;
+}
+
 .hide {
     display: none;
 }
@@ -203,6 +207,15 @@ input[type="submit"] {
 .error-item {
     color: red;
     border: 1px solid red;
+}
+
+.form-item .button-delete {
+    background: red;
+}
+
+.form-item .button-delete:hover {
+    background: black;
+    color: red;
 }
 
 input[type="submit"], .button {
