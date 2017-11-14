@@ -45,4 +45,5 @@ $template_delete = build_template('delete',
 
 print(build_template('layout',
     ['title' => 'Удаление строк в расписании',
+    'screen' => $screen_id,
     'content' => $template_delete]));

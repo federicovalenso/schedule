@@ -123,22 +123,33 @@ function chk_dupl_screen_position($screen_id, $screen_position) {
  * @param $direction int направление и длина перемещения
  * @return Nothing
  * 
- * @throws Неверная позиция на экране
+ * @throws Строка не может быть перемещена на позицию $номер_позиции
+ * @throws Неверный идентификатор строки расписания
  */
 function change_screen_position($id, $direction) {
     $db = new DB();
-
-    $cur_sched = $db->select_data(
+    $sched_rows_by_id = $db->select_data(
         "SELECT screen_position,
         screen_id
         FROM sched
         WHERE sched_id=?",
-        [$id])[0];
+        [$id]);
+
+    if (count($sched_rows_by_id) == 0) {
+        throw new Exception("Неверный идентификатор строки расписания");
+    }
+
+    $cur_sched = $sched_rows_by_id[0];
     $old_position = intval($cur_sched['screen_position']);
     $new_position = $old_position + $direction;
+    $sched_rows_on_screen = count($db->select_data(
+        "SELECT sched_id
+        FROM sched
+        WHERE screen_id=?",
+        [$cur_sched['screen_id']]));
 
-    if ($new_position < 1 || $new_position > 9) {
-        throw new Exception('Неверная позиция на экране');
+    if ($new_position < 1 || $new_position > 9 || $new_position > $sched_rows_on_screen) {
+        throw new Exception('Строка не может быть перемещена на позицию ' . $new_position);
     }
 
     $db->exec_query(
@@ -157,6 +168,30 @@ function change_screen_position($id, $direction) {
         sched_id=?",
         [$new_position,
         $id]);
+}
+/**
+ * Ищет на каком экране находится строка расписания
+ * @param $sched_id int идентификатор строки расписания
+ *
+ * @return int идентификатор экрана
+ * 
+ */
+function find_screen_by_sched($sched_id) {
+    $out_screen_id = NULL;
+    $db = new DB();
+    $sched_rows = $db->select_data(
+        "SELECT sched_id,
+        screen_id
+        FROM sched
+        WHERE sched_id=?",
+        [$sched_id]
+    );
+
+    if (count($sched_rows) > 0) {
+        $out_screen_id = $sched_rows[0]['screen_id'];
+    }
+
+    return $out_screen_id;
 }
 /**
  * Обновляет позиции строк расписания на выбранном экране

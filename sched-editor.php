@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'fri' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
         'fri_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
         'screen_id' => v::intVal()->min(1)->max(count($screens)),
+        'screen_position' => v::optional(v::intVal()->min(1)->max(8))
     ];
     $errors_desc = [
         'sched_id' => 'Некорректный id расписания',
@@ -51,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'fri' => 'Некорректно введено время!',
         'fri_end' => 'Некорректно введено время!',
         'screen_id' => 'Неверный номер экрана!',
+        'screen_position' => 'Неверная позиция на экране!'
     ];
 
     foreach ($_POST as $key => $value) {
@@ -59,11 +61,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors[$key] = $errors_desc[$key];
         }
     }
-
+    //Находим существующую (либо нет, если ноль) строку расписания для врача, и
+    //номер экрана, где эта строка находится
     list($exist_sched_id, $exist_screen_id) = chk_dupl_doc_sched($cur_sched['doc_id']);
     
+    //Если расписание для врача существует и текущий id расписания не равен существующему,
+    //то-есть проверяем дубли расписания
     if ($exist_sched_id != NULL && $cur_sched['sched_id'] != $exist_sched_id) {
         $errors['doc_id'] = "Для данного доктора уже существует расписание на экране $exist_screen_id, просто отредактируйте его при необходимости!";
+    }
+    //Если строка расписания существует, но при этом выбран врач, у которого ранее не было расписания
+    else if ($cur_sched['sched_id'] != NULL && $exist_sched_id == NULL) {
+        //Ищем на каком экране находится строка расписания
+        $exist_screen_id = find_screen_by_sched($cur_sched['sched_id']);
     }
 
     if (isset($errors['screen_id']) == FALSE) {
@@ -80,13 +90,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($sched_rows >= 9) {
             $errors['screen_id'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
         }
-        else {
+        //Если меняем экран для существующей строки расписания, либо
+        //если вводим новую строку (то-есть идентификатор равен нулю)
+        else if ($exist_screen_id != $cur_sched['screen_id'] || $cur_sched['sched_id'] == NULL) {
             $cur_sched['screen_position'] = $sched_rows + 1;
         }
     }
     
     if (count($errors) == 0) {
-    
+        //Если редактируем существующую строку
         if ($cur_sched['sched_id'] != NULL) {
             $db->exec_query(
                 "UPDATE sched
@@ -120,7 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $cur_sched['sched_id']
                 ]
             );
-            if ($exist_screen_id != NULL && $cur_sched['screen_id'] != $exist_screen_id) {
+            //Обновляем позиции всех строке на экране
+            if ($exist_screen_id != NULL) {
                 try {
                     refresh_screen_positions($exist_screen_id);
                 }
@@ -130,6 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
         }
+        //Если вводим новую строку
         else {
             $db->insert_data(
                 'sched',
@@ -160,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $sched_id = intval($_GET['id']);
 
         if (is_int($sched_id) == FALSE) {
-            print('Incorrect id type...');
+            print('Неверный идентификатор строки расписания...');
             exit();
         }
 
@@ -178,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $screen_id = intval($_GET['screen_id']);
 
         if (check_screen_id($screen_id) == FALSE) {
-            print('Incorrect screen id...');
+            print('Неверный идентификатор экрана...');
             exit();
         }
 

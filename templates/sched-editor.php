@@ -6,7 +6,10 @@
                 <?php foreach($docs as $cur_doc) : ?>
                     <option 
                         value="<?= $cur_doc['doc_id'] ?>" 
-                        <?= $cur_doc['doc_id'] == $sched['doc_id'] ? 'selected=selected' : '' ?>><?= $cur_doc['cab'] . ' ' . $cur_doc['snp'] . ' ' . $cur_doc['post'] ?></option>
+                        <?php if (isset($sched['doc_id']) == TRUE) : ?>
+                            <?= $cur_doc['doc_id'] == $sched['doc_id'] ? 'selected=selected' : '' ?>
+                        <?php endif ?>
+                        ><?= $cur_doc['cab'] . ' ' . $cur_doc['snp'] . ' ' . $cur_doc['post'] ?></option>
                 <? endforeach ?>
             </select>
             <label class="error-label"><?= $errors['doc_id'] ?? '' ?></label>
@@ -67,18 +70,20 @@
                 <?php endforeach ?>
             </select>
             <label class="error-label"><?= $errors['screen_id'] ?? '' ?></label>
-        </div>  
+        </div>
+        <input class="hide" type="number" name="screen_position" value=<?= $sched['screen_position'] ?? '' ?>>
+        <label class="error-label"><?= $errors['screen_position'] ?? '' ?></label>
         <div class="form-item">
             <input type="submit" value="Сохранить">
         </div>      
 </form>
 
-<?php if(isset($sched['sched_id']) == TRUE) : ?>
-<form action="delete.php" method="POST">
-    <input class="hide" type="number" name="sched_id" value=<?= $sched['sched_id'] ?> required>
-    <input class="hide" type="number" name="screen_id" value=<?= $sched['screen_id'] ?> required>
-    <div class="form-item">
-        <input class="button-delete" type="submit" value="Удалить">
-    </div>
-</form>
+<?php if (isset($sched['sched_id']) == TRUE) : ?>
+    <form action="delete.php" method="POST">
+        <input class="hide" type="number" name="sched_id" value=<?= $sched['sched_id'] ?> required>
+        <input class="hide" type="number" name="screen_id" value=<?= $sched['screen_id'] ?> required>
+        <div class="form-item">
+            <input class="button-delete" type="submit" value="Удалить">
+        </div>
+    </form>
 <?php endif ?>
