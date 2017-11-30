@@ -1,5 +1,6 @@
 <?php
 require_once('db.php');
+require_once('core/Schedule.php');
 /**
  * Создает шаблон html-документа, принимая на вход имя файла-шаблона и 
  * массив параметров, значения которых подставляются в файле-шаблоне
@@ -24,15 +25,15 @@ function build_template($file, $params) {
 }
 /**
  * Проверяет корректность id экрана
- * id должно соотвествовать перечислению [1...9]
+ * id должно соотвествовать перечислению [1...8]
  * @param $id int идентификатор экрана
  *
- * @return $result boolean если идентификтор - положительное число, меньшее 10, то он корректен, иначе нет
+ * @return $result boolean если идентификтор - положительное число, меньшее 9, то он корректен, иначе нет
  */
 function check_screen_id($id) {
     $result = FALSE;
 
-    if (is_int($id) && $id > 0 && $id < 10) {
+    if (is_int($id) && $id > 0 && $id < 9) {
         $result = TRUE;
     }
 
@@ -148,7 +149,7 @@ function change_screen_position($id, $direction) {
         WHERE screen_id=?",
         [$cur_sched['screen_id']]));
 
-    if ($new_position < 1 || $new_position > 9 || $new_position > $sched_rows_on_screen) {
+    if ($new_position < 1 || $new_position > Schedule::ROWS_COUNT || $new_position > $sched_rows_on_screen) {
         throw new Exception('Строка не может быть перемещена на позицию ' . $new_position);
     }
 
@@ -204,7 +205,7 @@ function find_screen_by_sched($sched_id) {
 function refresh_screen_positions($screen_id) {
     $db = new DB();
 
-    if ($screen_id < 1 || $screen_id > 8) {
+    if (check_screen_id($screen_id) == FALSE) {
         throw new Exception('Неверный идентификатор экрана');
     }
 

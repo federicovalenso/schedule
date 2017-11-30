@@ -1,6 +1,6 @@
 <?php 
 
-error_reporting(E_ALL^E_NOTICE);
+error_reporting(E_ALL);
 session_start();
 require_once('db.php');
 require_once('functions.php');

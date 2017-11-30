@@ -6,7 +6,6 @@ require_once('db.php');
 require_once('functions.php');
 require_once('vendor/autoload.php');
 
-use Respect\Validation\Validator as v;
 $errors = [];
 $cur_sched = [];
 $template_editor = NULL;
@@ -22,46 +21,13 @@ $docs = $db->select_data(
 $screens = $db->select_data("SELECT * FROM screens");
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $rules = [
-        'sched_id' => v::optional(v::intVal()),
-        'doc_id' => v::optional(v::intVal()),
-        'mon' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'mon_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'tue' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'tue_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'wed' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'wed_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'thu' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'thu_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'fri' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'fri_end' => v::optional(v::date('H:i')->min('08:00')->max('20:00')),
-        'screen_id' => v::intVal()->min(1)->max(count($screens)),
-        'screen_position' => v::optional(v::intVal()->min(1)->max(8))
-    ];
-    $errors_desc = [
-        'sched_id' => 'Некорректный id расписания',
-        'doc_id' => 'Введён некорректный id врача!',
-        'mon' => 'Некорректно введено время!',
-        'mon_end' => 'Некорректно введено время!',
-        'tue' => 'Некорректно введено время!',
-        'tue_end' => 'Некорректно введено время!',
-        'wed' => 'Некорректно введено время!',
-        'wed_end' => 'Некорректно введено время!',
-        'thu' => 'Некорректно введено время!',
-        'thu_end' => 'Некорректно введено время!',
-        'fri' => 'Некорректно введено время!',
-        'fri_end' => 'Некорректно введено время!',
-        'screen_id' => 'Неверный номер экрана!',
-        'screen_position' => 'Неверная позиция на экране!'
-    ];
 
+    $schedule = new Schedule();
+    $errors = $schedule->validate_input_data($_POST);
     foreach ($_POST as $key => $value) {
         $cur_sched[$key] = trim(htmlspecialchars($value));
-        if ($rules[$key]->validate($value) == FALSE) {
-            $errors[$key] = $errors_desc[$key];
-        }
     }
-    //Находим существующую (либо нет, если ноль) строку расписания для врача, и
+    //Находим существующую (либо нет, если NULL) строку расписания для врача, и
     //номер экрана, где эта строка находится
     list($exist_sched_id, $exist_screen_id) = chk_dupl_doc_sched($cur_sched['doc_id']);
     
@@ -91,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors['screen_id'] = "На экране уже имеется 9 записей, отобразить больше нельзя!";
         }
         //Если меняем экран для существующей строки расписания, либо
-        //если вводим новую строку (то-есть идентификатор равен нулю)
+        //если вводим новую строку (то-есть идентификатор равен NULL)
         else if ($exist_screen_id != $cur_sched['screen_id'] || $cur_sched['sched_id'] == NULL) {
             $cur_sched['screen_position'] = $sched_rows + 1;
         }
@@ -132,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $cur_sched['sched_id']
                 ]
             );
-            //Обновляем позиции всех строке на экране
+            //Обновляем позиции всех строк на экране
             if ($exist_screen_id != NULL) {
                 try {
                     refresh_screen_positions($exist_screen_id);
